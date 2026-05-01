@@ -4,9 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>InputX Store — клавиатуры и мышки</title>
-<link rel="icon" href="favicon.png" type="image/png">
-<link rel="shortcut icon" href="favicon.png">
+  <title>InputX Store — интерактивный каталог</title>
+  <link rel="icon" href="favicon.png" type="image/png">
+  <link rel="shortcut icon" href="favicon.png">
+
   <style>
     * {
       margin: 0;
@@ -18,7 +19,7 @@
     body {
       font-family: Arial, sans-serif;
       background: #050505;
-      color: #ffffff;
+      color: #fff;
       overflow-x: hidden;
       animation: pageLoad 0.8s ease;
     }
@@ -190,11 +191,15 @@
 
     .btn-main,
     .btn-second,
-    .order-btn {
+    .order-btn,
+    .filter-btn {
       display: inline-block;
       border-radius: 15px;
       font-weight: 900;
       transition: 0.25s;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
     }
 
     .btn-main {
@@ -228,10 +233,9 @@
       position: relative;
     }
 
-    .hero-label {
+    .hero-label,
+    .stock {
       position: absolute;
-      top: 18px;
-      left: 18px;
       z-index: 10;
       padding: 8px 12px;
       border-radius: 999px;
@@ -240,6 +244,17 @@
       color: #00ffd5;
       font-size: 12px;
       font-weight: 900;
+      backdrop-filter: blur(8px);
+    }
+
+    .hero-label {
+      top: 18px;
+      left: 18px;
+    }
+
+    .stock {
+      top: 16px;
+      left: 16px;
     }
 
     .product-art {
@@ -495,6 +510,30 @@
       overflow: visible;
     }
 
+    .filters {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 38px;
+    }
+
+    .filter-btn {
+      padding: 12px 18px;
+      background: rgba(255,255,255,0.04);
+      color: #d7d7d7;
+      border: 1px solid #2b2b2b;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: linear-gradient(135deg, #00ffd5, #00aaff);
+      color: #000;
+      border-color: transparent;
+      box-shadow: 0 0 28px rgba(0,255,213,0.28);
+      transform: translateY(-3px);
+    }
+
     .products {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -506,11 +545,16 @@
       background: linear-gradient(145deg, #111, #070707);
       border: 1px solid #242424;
       border-radius: 30px;
-      transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+      transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease, opacity 0.25s ease;
       animation: fadeUp 1s ease both;
       position: relative;
       z-index: 1;
       overflow: visible;
+      cursor: pointer;
+    }
+
+    .card.hide {
+      display: none;
     }
 
     .card:hover {
@@ -533,21 +577,6 @@
       border-bottom: 1px solid #242424;
       margin-bottom: 0;
       overflow: hidden;
-    }
-
-    .stock {
-      position: absolute;
-      top: 16px;
-      left: 16px;
-      z-index: 10;
-      padding: 7px 11px;
-      border-radius: 999px;
-      background: rgba(0,255,213,0.12);
-      border: 1px solid rgba(0,255,213,0.35);
-      color: #00ffd5;
-      font-size: 12px;
-      font-weight: 900;
-      backdrop-filter: blur(8px);
     }
 
     .card-info {
@@ -601,6 +630,13 @@
       color: #000;
       font-size: 14px;
       white-space: nowrap;
+    }
+
+    .small-note {
+      text-align: center;
+      color: #777;
+      font-size: 14px;
+      margin-top: 22px;
     }
 
     .check-section {
@@ -794,11 +830,139 @@
       background: #050505;
     }
 
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 3000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0,0,0,0.76);
+      backdrop-filter: blur(14px);
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 920px;
+      background:
+        radial-gradient(circle at top right, rgba(0,255,213,0.16), transparent 38%),
+        linear-gradient(145deg, #111, #060606);
+      border: 1px solid rgba(0,255,213,0.26);
+      border-radius: 34px;
+      box-shadow: 0 0 90px rgba(0,255,213,0.16);
+      overflow: hidden;
+      animation: modalIn 0.25s ease;
+      position: relative;
+    }
+
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: translateY(25px) scale(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      border: 1px solid #333;
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 5;
+      transition: 0.25s;
+    }
+
+    .modal-close:hover {
+      color: #00ffd5;
+      border-color: #00ffd5;
+      transform: scale(1.05);
+    }
+
+    .modal-content {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 28px;
+      padding: 34px;
+      align-items: center;
+    }
+
+    .modal-content .product-art {
+      margin-bottom: 0;
+      height: 330px;
+    }
+
+    .modal-info h2 {
+      font-size: 38px;
+      margin-bottom: 12px;
+    }
+
+    .modal-info p {
+      color: #aaa;
+      line-height: 1.7;
+      margin-bottom: 18px;
+    }
+
+    .modal-price {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 18px 0;
+    }
+
+    .modal-price strong {
+      color: #00ffd5;
+      font-size: 34px;
+    }
+
+    .modal-specs {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 18px 0 22px;
+    }
+
+    .modal-specs div {
+      padding: 13px;
+      border-radius: 16px;
+      border: 1px solid #282828;
+      background: rgba(255,255,255,0.035);
+      color: #ddd;
+      font-size: 14px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .modal-hint {
+      margin-top: 14px;
+      color: #777;
+      font-size: 13px;
+    }
+
     @media (max-width: 900px) {
       .hero-grid,
       .bestseller-box,
       .check-box,
-      .delivery-box {
+      .delivery-box,
+      .modal-content {
         grid-template-columns: 1fr;
       }
 
@@ -806,7 +970,8 @@
       .products,
       .review-grid,
       .faq-grid,
-      .specs {
+      .specs,
+      .modal-specs {
         grid-template-columns: repeat(2, 1fr);
       }
 
@@ -855,7 +1020,8 @@
       .products,
       .review-grid,
       .faq-grid,
-      .specs {
+      .specs,
+      .modal-specs {
         grid-template-columns: 1fr;
       }
 
@@ -896,6 +1062,24 @@
         transform: none;
         box-shadow: 0 0 35px rgba(0,255,213,0.15);
       }
+
+      .modal-content {
+        padding: 24px;
+      }
+
+      .modal-info h2 {
+        font-size: 29px;
+      }
+
+      .modal-content .product-art {
+        height: 240px;
+      }
+
+      .modal-actions .btn-main,
+      .modal-actions .btn-second {
+        width: 100%;
+        text-align: center;
+      }
     }
   </style>
 </head>
@@ -914,9 +1098,7 @@
         <a href="#faq">FAQ</a>
       </nav>
 
-      <a class="telegram-top" href="https://t.me/inputXstore" target="_blank">
-        Telegram
-      </a>
+      <a class="telegram-top" href="https://t.me/inputXstore" target="_blank">Telegram</a>
     </div>
   </header>
 
@@ -933,13 +1115,12 @@
           </h1>
 
           <p class="hero-text">
-            InputX — магазин клавиатур, мышек и аксессуаров.
-            Минимальная предоплата, быстрая связь, понятные условия
-            и оформление заказа через Telegram.
+            InputX — демо-магазин игровой периферии. Теперь каталог стал живым:
+            можно фильтровать товары и открывать карточку товара в отдельном окне.
           </p>
 
           <div class="hero-buttons">
-            <a class="btn-main" href="#catalog">Смотреть каталог</a>
+            <a class="btn-main" href="#catalog">Открыть каталог</a>
 
             <a class="btn-second" href="https://t.me/inputXstore?text=Привет!%20Хочу%20подобрать%20клавиатуру%20или%20мышку" target="_blank">
               Подобрать товар
@@ -962,10 +1143,7 @@
           </div>
 
           <h3>Aula F75 Max</h3>
-          <p>
-            75% формат, Hot-Swap, RGB, Bluetooth, 2.4 ГГц
-            и проводной режим через USB-C.
-          </p>
+          <p>75% формат, Hot-Swap, RGB, Bluetooth, 2.4 ГГц и проводной режим через USB-C.</p>
 
           <div>
             <span class="price">$65</span>
@@ -1062,13 +1240,20 @@
     <section class="catalog" id="catalog">
       <div class="container">
         <div class="section-title">
-          <h2>Каталог товаров</h2>
-          <p>Выбирай товары с лучшим сочетанием цены, качества и внешнего вида.</p>
+          <h2>Интерактивный каталог</h2>
+          <p>Выбери категорию или нажми на товар, чтобы открыть подробную карточку.</p>
+        </div>
+
+        <div class="filters">
+          <button class="filter-btn active" data-filter="all">Все товары</button>
+          <button class="filter-btn" data-filter="keyboard">Клавиатуры</button>
+          <button class="filter-btn" data-filter="mouse">Мышки</button>
+          <button class="filter-btn" data-filter="accessory">Аксессуары</button>
         </div>
 
         <div class="products">
 
-          <div class="card">
+          <div class="card" data-category="keyboard" data-title="Aula F75 Max" data-price="$65" data-old="$75" data-type="keyboard" data-desc="Механическая клавиатура 75%, RGB, Hot-Swap, Bluetooth, 2.4 ГГц и USB-C. Отличный вариант для игр, работы и учёбы." data-specs="75% формат|Hot-Swap|RGB подсветка|Bluetooth / 2.4G / USB-C" data-link="https://t.me/inputXstore?text=Привет!%20Хочу%20заказать%20Aula%20F75%20Max%20за%20$65">
             <div class="stock">В наличии</div>
             <div class="card-inner">
               <div class="product-art">
@@ -1099,15 +1284,13 @@
                     <span class="old-price">$75</span>
                   </div>
 
-                  <a class="order-btn" href="https://t.me/inputXstore?text=Привет!%20Хочу%20заказать%20Aula%20F75%20Max%20за%20$65" target="_blank">
-                    Заказать
-                  </a>
+                  <span class="order-btn">Подробнее</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="card">
+          <div class="card" data-category="mouse" data-title="Gaming Mouse X1" data-price="$25" data-old="$32" data-type="mouse" data-desc="Лёгкая игровая мышка для шутеров, работы и повседневного использования. Подойдёт тем, кто хочет быстрый отклик и аккуратный внешний вид." data-specs="Лёгкий корпус|Точный сенсор|RGB зона|Удобный хват" data-link="https://t.me/inputXstore?text=Привет!%20Хочу%20заказать%20Gaming%20Mouse%20X1%20за%20$25">
             <div class="stock">Топ выбор</div>
             <div class="card-inner">
               <div class="product-art">
@@ -1130,15 +1313,13 @@
                     <span class="old-price">$32</span>
                   </div>
 
-                  <a class="order-btn" href="https://t.me/inputXstore?text=Привет!%20Хочу%20заказать%20Gaming%20Mouse%20X1%20за%20$25" target="_blank">
-                    Заказать
-                  </a>
+                  <span class="order-btn">Подробнее</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="card">
+          <div class="card" data-category="accessory" data-title="Аксессуары InputX" data-price="от $10" data-old="" data-type="accessory" data-desc="Коврики, кабели, свитчи и другие товары для рабочего места. Можно собрать аккуратный сетап под свой стол." data-specs="Коврики|Кабели|Свитчи|Аксессуары для сетапа" data-link="https://t.me/inputXstore?text=Привет!%20Хочу%20узнать%20про%20аксессуары%20InputX">
             <div class="stock">От $10</div>
             <div class="card-inner">
               <div class="product-art">
@@ -1163,14 +1344,16 @@
                     <span class="product-price">от $10</span>
                   </div>
 
-                  <a class="order-btn" href="https://t.me/inputXstore?text=Привет!%20Хочу%20узнать%20про%20аксессуары%20InputX" target="_blank">
-                    Узнать
-                  </a>
+                  <span class="order-btn">Подробнее</span>
                 </div>
               </div>
             </div>
           </div>
 
+        </div>
+
+        <div class="small-note">
+          Нажми на карточку товара, чтобы открыть подробности.
         </div>
       </div>
     </section>
@@ -1184,13 +1367,11 @@
             <h2>Проверяем товар перед продажей</h2>
 
             <p>
-              Чтобы покупателю было спокойнее, перед оформлением можно уточнить наличие,
-              комплектацию, состояние товара и условия отправки.
+              Перед оформлением можно уточнить наличие, комплектацию, состояние товара и условия отправки.
             </p>
 
             <p>
-              Этот блок сильно повышает доверие, потому что человек видит:
-              магазин не просто “принял деньги”, а нормально сопровождает заказ.
+              Такой блок повышает доверие: человек видит, что магазин сопровождает заказ, а не просто принимает заявку.
             </p>
           </div>
 
@@ -1208,32 +1389,26 @@
     <section class="reviews" id="reviews">
       <div class="container">
         <div class="section-title">
-          <h2>Примеры отзывов</h2>
+          <h2>Будущие отзывы клиентов</h2>
           <p>Здесь будут реальные отзывы клиентов после запуска магазина.</p>
         </div>
 
         <div class="review-grid">
           <div class="review">
             <div class="stars">★★★★★</div>
-            <p>
-              “Здесь могут быть отзывы ваших клиентов после первых заказов.”
-            </p>
+            <p>“Здесь может быть отзыв клиента о товаре, доставке или качестве обслуживания.”</p>
             <strong>Ваш отзыв</strong>
           </div>
 
           <div class="review">
             <div class="stars">★★★★★</div>
-            <p>
-              “Здесь могут быть отзывы ваших клиентов после первых заказов.”
-            </p>
+            <p>“Здесь может быть короткий отзыв о покупке через Telegram и удобстве заказа.”</p>
             <strong>Ваш отзыв</strong>
           </div>
 
           <div class="review">
             <div class="stars">★★★★★</div>
-            <p>
-              “Здесь могут быть отзывы ваших клиентов после первых заказов.”
-            </p>
+            <p>“Здесь может быть отзыв клиента после первого заказа в магазине.”</p>
             <strong>Ваш отзыв</strong>
           </div>
         </div>
@@ -1247,8 +1422,8 @@
             <h2>Доставка и оплата</h2>
 
             <p>
-              Заказ оформляется через Telegram. Мы уточняем товар,
-              цену, наличие, способ доставки и подтверждаем заказ.
+              Заказ оформляется через Telegram. Мы уточняем товар, цену, наличие,
+              способ доставки и подтверждаем заказ.
             </p>
 
             <p>
@@ -1317,9 +1492,155 @@
 
   <footer>
     <div class="container">
-      © 2026 InputX Store. Клавиатуры, мышки и аксессуары.
+      © 2026 InputX Store. Интерактивный демо-каталог.
     </div>
   </footer>
+
+  <div class="modal" id="productModal">
+    <div class="modal-box">
+      <button class="modal-close" id="modalClose">×</button>
+
+      <div class="modal-content">
+        <div class="product-art" id="modalArt"></div>
+
+        <div class="modal-info">
+          <div class="badge">Подробности товара</div>
+
+          <h2 id="modalTitle">Название товара</h2>
+
+          <p id="modalDesc">Описание товара</p>
+
+          <div class="modal-specs" id="modalSpecs"></div>
+
+          <div class="modal-price">
+            <strong id="modalPrice">$0</strong>
+            <span class="old-price" id="modalOldPrice"></span>
+          </div>
+
+          <div class="modal-actions">
+            <a class="btn-main" id="modalOrder" href="#" target="_blank">Заказать в Telegram</a>
+            <button class="btn-second" id="modalCloseSecond">Вернуться к каталогу</button>
+          </div>
+
+          <div class="modal-hint">
+            Это демо-карточка товара. В реальном проекте сюда можно добавить реальные фото, остаток, гарантию и выбор цвета.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const filterButtons = document.querySelectorAll(".filter-btn");
+    const cards = document.querySelectorAll(".card");
+
+    filterButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        const filter = button.dataset.filter;
+
+        filterButtons.forEach(btn => btn.classList.remove("active"));
+        button.classList.add("active");
+
+        cards.forEach(card => {
+          const category = card.dataset.category;
+
+          if (filter === "all" || category === filter) {
+            card.classList.remove("hide");
+          } else {
+            card.classList.add("hide");
+          }
+        });
+      });
+    });
+
+    const modal = document.getElementById("productModal");
+    const modalClose = document.getElementById("modalClose");
+    const modalCloseSecond = document.getElementById("modalCloseSecond");
+    const modalArt = document.getElementById("modalArt");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalDesc = document.getElementById("modalDesc");
+    const modalSpecs = document.getElementById("modalSpecs");
+    const modalPrice = document.getElementById("modalPrice");
+    const modalOldPrice = document.getElementById("modalOldPrice");
+    const modalOrder = document.getElementById("modalOrder");
+
+    function createArt(type) {
+      if (type === "keyboard") {
+        return `
+          <div class="keyboard">
+            <div class="key"></div><div class="key"></div><div class="key glow"></div><div class="key"></div><div class="key"></div>
+            <div class="key"></div><div class="key"></div><div class="key glow"></div><div class="key"></div><div class="key"></div>
+            <div class="key"></div><div class="key glow"></div><div class="key"></div><div class="key"></div><div class="key"></div>
+            <div class="key"></div><div class="key"></div><div class="key"></div><div class="key glow"></div><div class="key"></div>
+            <div class="key"></div><div class="key"></div><div class="key"></div><div class="key glow"></div><div class="key"></div>
+            <div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div>
+          </div>
+        `;
+      }
+
+      if (type === "mouse") {
+        return `<div class="mouse"></div>`;
+      }
+
+      return `
+        <div class="accessory">
+          <div class="pad"></div>
+          <div class="cable"></div>
+        </div>
+      `;
+    }
+
+    function openModal(card) {
+      const title = card.dataset.title;
+      const desc = card.dataset.desc;
+      const price = card.dataset.price;
+      const oldPrice = card.dataset.old;
+      const type = card.dataset.type;
+      const specs = card.dataset.specs.split("|");
+      const link = card.dataset.link;
+
+      modalArt.innerHTML = createArt(type);
+      modalTitle.textContent = title;
+      modalDesc.textContent = desc;
+      modalPrice.textContent = price;
+      modalOldPrice.textContent = oldPrice || "";
+      modalOrder.href = link;
+
+      modalSpecs.innerHTML = "";
+      specs.forEach(spec => {
+        const item = document.createElement("div");
+        item.textContent = spec;
+        modalSpecs.appendChild(item);
+      });
+
+      modal.classList.add("active");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeModal() {
+      modal.classList.remove("active");
+      document.body.style.overflow = "";
+    }
+
+    cards.forEach(card => {
+      card.addEventListener("click", () => openModal(card));
+    });
+
+    modalClose.addEventListener("click", closeModal);
+    modalCloseSecond.addEventListener("click", closeModal);
+
+    modal.addEventListener("click", event => {
+      if (event.target === modal) {
+        closeModal();
+      }
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") {
+        closeModal();
+      }
+    });
+  </script>
 
 </body>
 </html>
