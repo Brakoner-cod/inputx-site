@@ -1149,6 +1149,252 @@
     text-align: center;
   }
 }
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cart-top {
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,255,213,0.35);
+  background: rgba(255,255,255,0.04);
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.cart-top:hover {
+  color: #00ffd5;
+  border-color: #00ffd5;
+  transform: translateY(-3px);
+}
+
+.cart-top span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  margin-left: 6px;
+  border-radius: 999px;
+  background: #00ffd5;
+  color: #000;
+  font-size: 12px;
+}
+
+.cart-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 4000;
+  display: none;
+  background: rgba(0,0,0,0.74);
+  backdrop-filter: blur(12px);
+}
+
+.cart-panel.active {
+  display: block;
+}
+
+.cart-box {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 420px;
+  max-width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(circle at top right, rgba(0,255,213,0.13), transparent 35%),
+    linear-gradient(145deg, #111, #060606);
+  border-left: 1px solid rgba(0,255,213,0.25);
+  padding: 24px;
+  overflow-y: auto;
+  animation: cartIn 0.25s ease;
+}
+
+@keyframes cartIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.cart-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.cart-head h2 {
+  font-size: 28px;
+}
+
+.cart-close {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,255,213,0.45);
+  background: rgba(255,255,255,0.04);
+  color: #00ffd5;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.cart-items {
+  display: grid;
+  gap: 14px;
+}
+
+.cart-empty {
+  color: #aaa;
+  line-height: 1.6;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid #242424;
+  background: rgba(255,255,255,0.035);
+}
+
+.cart-item {
+  padding: 16px;
+  border-radius: 20px;
+  border: 1px solid #242424;
+  background: rgba(255,255,255,0.035);
+}
+
+.cart-item-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.cart-item-title {
+  font-weight: 900;
+}
+
+.cart-item-price {
+  color: #00ffd5;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.cart-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.qty {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.qty button,
+.remove-item {
+  border: 1px solid #333;
+  background: rgba(255,255,255,0.04);
+  color: #fff;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.qty button {
+  width: 34px;
+  height: 34px;
+  font-size: 18px;
+}
+
+.qty button:hover,
+.remove-item:hover {
+  border-color: #00ffd5;
+  color: #00ffd5;
+}
+
+.remove-item {
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.cart-total {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid #242424;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cart-total span {
+  color: #aaa;
+}
+
+.cart-total strong {
+  color: #00ffd5;
+  font-size: 30px;
+}
+
+.cart-order {
+  width: 100%;
+  margin-top: 18px;
+  text-align: center;
+}
+
+.cart-note {
+  margin-top: 12px;
+  color: #777;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.added-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%) translateY(20px);
+  z-index: 5000;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: rgba(0,255,213,0.12);
+  border: 1px solid rgba(0,255,213,0.45);
+  color: #00ffd5;
+  font-weight: 900;
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.25s;
+  backdrop-filter: blur(10px);
+}
+
+.added-toast.active {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+@media (max-width: 600px) {
+  .header-actions {
+    gap: 8px;
+  }
+
+  .cart-top {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .cart-box {
+    width: 100%;
+    padding: 20px;
+  }
+}
   </style>
 </head>
 
@@ -1166,7 +1412,13 @@
         <a href="#faq">FAQ</a>
       </nav>
 
-      <a class="telegram-top" href="https://t.me/inputXstore" target="_blank">Telegram</a>
+      <div class="header-actions">
+  <button class="cart-top" id="cartOpen">
+    🛒 Корзина <span id="cartCount">0</span>
+  </button>
+
+  <a class="telegram-top" href="https://t.me/inputXstore" target="_blank">Telegram</a>
+</div>
     </div>
   </header>
 
@@ -1597,118 +1849,339 @@
       </div>
     </div>
   </div>
+<div class="cart-panel" id="cartPanel">
+  <div class="cart-box">
+    <div class="cart-head">
+      <h2>Корзина</h2>
+      <button class="cart-close" id="cartClose">×</button>
+    </div>
 
+    <div class="cart-items" id="cartItems">
+      <div class="cart-empty">Корзина пустая. Добавь товар из карточки.</div>
+    </div>
+
+    <div class="cart-total">
+      <span>Итого:</span>
+      <strong id="cartTotal">$0</strong>
+    </div>
+
+    <a class="btn-main cart-order" id="cartOrder" href="https://t.me/inputXstore" target="_blank">
+      Оформить в Telegram
+    </a>
+
+    <div class="cart-note">
+      После нажатия Telegram откроется с готовым списком товаров.
+    </div>
+  </div>
+</div>
+
+<div class="added-toast" id="addedToast">
+  Товар добавлен в корзину
+</div>
   <script>
-    const filterButtons = document.querySelectorAll(".filter-btn");
-    const cards = document.querySelectorAll(".card");
+  const filterButtons = document.querySelectorAll(".filter-btn");
+  const cards = document.querySelectorAll(".card");
 
-    filterButtons.forEach(button => {
-      button.addEventListener("click", () => {
-        const filter = button.dataset.filter;
+  filterButtons.forEach(button => {
+    button.addEventListener("click", () => {
+      const filter = button.dataset.filter;
 
-        filterButtons.forEach(btn => btn.classList.remove("active"));
-        button.classList.add("active");
+      filterButtons.forEach(btn => btn.classList.remove("active"));
+      button.classList.add("active");
 
-        cards.forEach(card => {
-          const category = card.dataset.category;
+      cards.forEach(card => {
+        const category = card.dataset.category;
 
-          if (filter === "all" || category === filter) {
-            card.classList.remove("hide");
-          } else {
-            card.classList.add("hide");
-          }
-        });
+        if (filter === "all" || category === filter) {
+          card.classList.remove("hide");
+        } else {
+          card.classList.add("hide");
+        }
       });
     });
+  });
 
-    const modal = document.getElementById("productModal");
-    const modalClose = document.getElementById("modalClose");
-    const modalCloseSecond = document.getElementById("modalCloseSecond");
-    const modalArt = document.getElementById("modalArt");
-    const modalTitle = document.getElementById("modalTitle");
-    const modalDesc = document.getElementById("modalDesc");
-    const modalSpecs = document.getElementById("modalSpecs");
-    const modalPrice = document.getElementById("modalPrice");
-    const modalOldPrice = document.getElementById("modalOldPrice");
-    const modalOrder = document.getElementById("modalOrder");
+  const modal = document.getElementById("productModal");
+  const modalClose = document.getElementById("modalClose");
+  const modalCloseSecond = document.getElementById("modalCloseSecond");
+  const modalArt = document.getElementById("modalArt");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalDesc = document.getElementById("modalDesc");
+  const modalSpecs = document.getElementById("modalSpecs");
+  const modalPrice = document.getElementById("modalPrice");
+  const modalOldPrice = document.getElementById("modalOldPrice");
+  const modalOrder = document.getElementById("modalOrder");
 
-    function createArt(type) {
-      if (type === "keyboard") {
-        return `
-          <div class="keyboard">
-            <div class="key"></div><div class="key"></div><div class="key glow"></div><div class="key"></div><div class="key"></div>
-            <div class="key"></div><div class="key"></div><div class="key glow"></div><div class="key"></div><div class="key"></div>
-            <div class="key"></div><div class="key glow"></div><div class="key"></div><div class="key"></div><div class="key"></div>
-            <div class="key"></div><div class="key"></div><div class="key"></div><div class="key glow"></div><div class="key"></div>
-            <div class="key"></div><div class="key"></div><div class="key"></div><div class="key glow"></div><div class="key"></div>
-            <div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div>
-          </div>
-        `;
-      }
+  let currentProduct = null;
 
-      if (type === "mouse") {
-        return `<div class="mouse"></div>`;
-      }
-
+  function createArt(type) {
+    if (type === "keyboard") {
       return `
-        <div class="accessory">
-          <div class="pad"></div>
-          <div class="cable"></div>
+        <div class="keyboard">
+          <div class="key"></div><div class="key"></div><div class="key glow"></div><div class="key"></div><div class="key"></div>
+          <div class="key"></div><div class="key"></div><div class="key glow"></div><div class="key"></div><div class="key"></div>
+          <div class="key"></div><div class="key glow"></div><div class="key"></div><div class="key"></div><div class="key"></div>
+          <div class="key"></div><div class="key"></div><div class="key"></div><div class="key glow"></div><div class="key"></div>
+          <div class="key"></div><div class="key"></div><div class="key"></div><div class="key glow"></div><div class="key"></div>
+          <div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div>
         </div>
       `;
     }
 
-    function openModal(card) {
-      const title = card.dataset.title;
-      const desc = card.dataset.desc;
-      const price = card.dataset.price;
-      const oldPrice = card.dataset.old;
-      const type = card.dataset.type;
-      const specs = card.dataset.specs.split("|");
-      const link = card.dataset.link;
+    if (type === "mouse") {
+      return `<div class="mouse"></div>`;
+    }
 
-      modalArt.innerHTML = createArt(type);
-      modalTitle.textContent = title;
-      modalDesc.textContent = desc;
-      modalPrice.textContent = price;
-      modalOldPrice.textContent = oldPrice || "";
-      modalOrder.href = link;
+    return `
+      <div class="accessory">
+        <div class="pad"></div>
+        <div class="cable"></div>
+      </div>
+    `;
+  }
 
-      modalSpecs.innerHTML = "";
-      specs.forEach(spec => {
-        const item = document.createElement("div");
-        item.textContent = spec;
-        modalSpecs.appendChild(item);
+  function parsePrice(priceText) {
+    const number = priceText.replace("$", "").replace("от", "").trim();
+    return Number(number) || 0;
+  }
+
+  function openModal(card) {
+    const title = card.dataset.title;
+    const desc = card.dataset.desc;
+    const price = card.dataset.price;
+    const oldPrice = card.dataset.old;
+    const type = card.dataset.type;
+    const specs = card.dataset.specs.split("|");
+    const link = card.dataset.link;
+
+    currentProduct = {
+      id: title,
+      title: title,
+      priceText: price,
+      priceNumber: parsePrice(price),
+      link: link
+    };
+
+    modalArt.innerHTML = createArt(type);
+    modalTitle.textContent = title;
+    modalDesc.textContent = desc;
+    modalPrice.textContent = price;
+    modalOldPrice.textContent = oldPrice || "";
+    modalOrder.href = link;
+
+    modalSpecs.innerHTML = "";
+
+    specs.forEach(spec => {
+      const item = document.createElement("div");
+      item.textContent = spec;
+      modalSpecs.appendChild(item);
+    });
+
+    let addButton = document.getElementById("modalAddCart");
+
+    if (!addButton) {
+      addButton = document.createElement("button");
+      addButton.className = "btn-second";
+      addButton.id = "modalAddCart";
+      addButton.textContent = "Добавить в корзину";
+
+      const actions = document.querySelector(".modal-actions");
+      actions.insertBefore(addButton, actions.children[1]);
+
+      addButton.addEventListener("click", () => {
+        if (currentProduct) {
+          addToCart(currentProduct);
+        }
       });
-
-      modal.classList.add("active");
-      document.body.style.overflow = "hidden";
     }
 
-    function closeModal() {
-      modal.classList.remove("active");
-      document.body.style.overflow = "";
+    modal.classList.add("active");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeModal() {
+    modal.classList.remove("active");
+    document.body.style.overflow = "";
+  }
+
+  cards.forEach(card => {
+    card.addEventListener("click", () => openModal(card));
+  });
+
+  modalClose.addEventListener("click", closeModal);
+  modalCloseSecond.addEventListener("click", closeModal);
+
+  modal.addEventListener("click", event => {
+    if (event.target === modal) {
+      closeModal();
+    }
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      closeModal();
+      closeCart();
+    }
+  });
+
+  const cartOpen = document.getElementById("cartOpen");
+  const cartClose = document.getElementById("cartClose");
+  const cartPanel = document.getElementById("cartPanel");
+  const cartItems = document.getElementById("cartItems");
+  const cartCount = document.getElementById("cartCount");
+  const cartTotal = document.getElementById("cartTotal");
+  const cartOrder = document.getElementById("cartOrder");
+  const addedToast = document.getElementById("addedToast");
+
+  let cart = [];
+
+  function openCart() {
+    cartPanel.classList.add("active");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeCart() {
+    cartPanel.classList.remove("active");
+    document.body.style.overflow = "";
+  }
+
+  function showToast() {
+    addedToast.classList.add("active");
+
+    setTimeout(() => {
+      addedToast.classList.remove("active");
+    }, 1600);
+  }
+
+  function addToCart(product) {
+    const existing = cart.find(item => item.id === product.id);
+
+    if (existing) {
+      existing.qty += 1;
+    } else {
+      cart.push({
+        ...product,
+        qty: 1
+      });
     }
 
-    cards.forEach(card => {
-      card.addEventListener("click", () => openModal(card));
+    renderCart();
+    showToast();
+  }
+
+  function removeFromCart(id) {
+    cart = cart.filter(item => item.id !== id);
+    renderCart();
+  }
+
+  function changeQty(id, direction) {
+    const item = cart.find(product => product.id === id);
+
+    if (!item) return;
+
+    item.qty += direction;
+
+    if (item.qty <= 0) {
+      removeFromCart(id);
+      return;
+    }
+
+    renderCart();
+  }
+
+  function renderCart() {
+    cartItems.innerHTML = "";
+
+    if (cart.length === 0) {
+      cartItems.innerHTML = `<div class="cart-empty">Корзина пустая. Добавь товар из карточки.</div>`;
+    } else {
+      cart.forEach(item => {
+        const cartItem = document.createElement("div");
+        cartItem.className = "cart-item";
+
+        cartItem.innerHTML = `
+          <div class="cart-item-top">
+            <div class="cart-item-title">${item.title}</div>
+            <div class="cart-item-price">${item.priceText}</div>
+          </div>
+
+          <div class="cart-controls">
+            <div class="qty">
+              <button type="button" data-action="minus" data-id="${item.id}">−</button>
+              <span>${item.qty}</span>
+              <button type="button" data-action="plus" data-id="${item.id}">+</button>
+            </div>
+
+            <button class="remove-item" type="button" data-action="remove" data-id="${item.id}">
+              Убрать
+            </button>
+          </div>
+        `;
+
+        cartItems.appendChild(cartItem);
+      });
+    }
+
+    const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+    const totalPrice = cart.reduce((sum, item) => sum + item.priceNumber * item.qty, 0);
+
+    cartCount.textContent = totalItems;
+    cartTotal.textContent = `$${totalPrice}`;
+
+    updateTelegramLink();
+  }
+
+  function updateTelegramLink() {
+    if (cart.length === 0) {
+      cartOrder.href = "https://t.me/inputXstore";
+      return;
+    }
+
+    const lines = cart.map(item => {
+      return `— ${item.title}: ${item.qty} шт. (${item.priceText})`;
     });
 
-    modalClose.addEventListener("click", closeModal);
-    modalCloseSecond.addEventListener("click", closeModal);
+    const totalPrice = cart.reduce((sum, item) => sum + item.priceNumber * item.qty, 0);
 
-    modal.addEventListener("click", event => {
-      if (event.target === modal) {
-        closeModal();
-      }
-    });
+    const message =
+      `Привет! Хочу оформить заказ в InputX:%0A%0A` +
+      lines.join("%0A") +
+      `%0A%0AИтого: $${totalPrice}%0A` +
+      `Подскажите, есть ли всё в наличии?`;
 
-    document.addEventListener("keydown", event => {
-      if (event.key === "Escape") {
-        closeModal();
-      }
-    });
-  </script>
+    cartOrder.href = `https://t.me/inputXstore?text=${message}`;
+  }
+
+  cartOpen.addEventListener("click", openCart);
+  cartClose.addEventListener("click", closeCart);
+
+  cartPanel.addEventListener("click", event => {
+    if (event.target === cartPanel) {
+      closeCart();
+    }
+  });
+
+  cartItems.addEventListener("click", event => {
+    const action = event.target.dataset.action;
+    const id = event.target.dataset.id;
+
+    if (!action || !id) return;
+
+    if (action === "plus") {
+      changeQty(id, 1);
+    }
+
+    if (action === "minus") {
+      changeQty(id, -1);
+    }
+
+    if (action === "remove") {
+      removeFromCart(id);
+    }
+  });
+
+  renderCart();
+</script>
 
 </body>
 </html>
