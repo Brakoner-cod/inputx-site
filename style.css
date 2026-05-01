@@ -1601,4 +1601,74 @@
   box-shadow: 0 0 22px rgba(255, 59, 59, 0.45);
 }
 
+@media (max-width: 600px) {
+  header {
+    position: static;
+    top: auto;
+  }
+
+  .nav {
+    height: auto;
+    min-height: 0;
+    padding: 10px 0 12px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .logo {
+    font-size: 24px;
+    line-height: 1.1;
+  }
+
+  .menu {
+    display: none;
+  }
+
+  .header-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .cart-top,
+  .telegram-top {
+    min-width: 0;
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    line-height: 1.15;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .telegram-top {
+    grid-column: 1 / -1;
+  }
+
+  .cart-top span {
+    min-width: 18px;
+    height: 18px;
+    margin-left: 4px;
+    padding: 0 5px;
+    font-size: 10px;
+    line-height: 18px;
+  }
+
+  .cart-top:hover,
+  .telegram-top:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 18px rgba(0, 255, 213, 0.22);
+  }
+
+  .hero {
+    padding-top: 34px;
+  }
+}
+
 
