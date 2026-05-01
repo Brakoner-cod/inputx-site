@@ -1703,4 +1703,16 @@
   }
 }
 
+@media (max-width: 600px) {
+  .telegram-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: 900;
+    text-align: center;
+    line-height: 1;
+  }
+}
+
 
