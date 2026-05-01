@@ -1,53 +1,8 @@
-﻿const filterButtons = document.querySelectorAll(".filter-btn");
-  const cards = document.querySelectorAll(".card");
+document.addEventListener("DOMContentLoaded", () => {
+  const filterButtons = document.querySelectorAll(".filter-btn");
+  const cards = Array.from(document.querySelectorAll(".card"));
   const catalogSearch = document.getElementById("catalogSearch");
   const searchEmpty = document.getElementById("searchEmpty");
-  let activeFilter = "all";
-  let searchQuery = "";
-
-  function applyCatalogFilters() {
-    let visibleCount = 0;
-
-    cards.forEach(card => {
-      const category = card.dataset.category;
-      const haystack = [
-        card.dataset.title,
-        card.dataset.desc,
-        card.dataset.specs
-      ].join(" ").toLowerCase();
-      const matchesFilter = activeFilter === "all" || category === activeFilter;
-      const matchesSearch = !searchQuery || haystack.includes(searchQuery);
-
-      if (matchesFilter && matchesSearch) {
-        card.classList.remove("hide");
-        visibleCount += 1;
-      } else {
-        card.classList.add("hide");
-      }
-    });
-
-    if (searchEmpty) {
-      searchEmpty.classList.toggle("active", visibleCount === 0);
-    }
-  }
-
-  filterButtons.forEach(button => {
-    button.addEventListener("click", () => {
-      activeFilter = button.dataset.filter;
-
-      filterButtons.forEach(btn => btn.classList.remove("active"));
-      button.classList.add("active");
-
-      applyCatalogFilters();
-    });
-  });
-
-  if (catalogSearch) {
-    catalogSearch.addEventListener("input", event => {
-      searchQuery = event.target.value.trim().toLowerCase();
-      applyCatalogFilters();
-    });
-  }
 
   const modal = document.getElementById("productModal");
   const modalClose = document.getElementById("modalClose");
@@ -60,14 +15,130 @@
   const modalOldPrice = document.getElementById("modalOldPrice");
   const modalOrder = document.getElementById("modalOrder");
 
-  let currentProduct = null;
+  const cartOpen = document.getElementById("cartOpen");
+  const cartClose = document.getElementById("cartClose");
+  const cartPanel = document.getElementById("cartPanel");
+  const cartItems = document.getElementById("cartItems");
+  const cartCount = document.getElementById("cartCount");
+  const cartTotal = document.getElementById("cartTotal");
+  const cartOrder = document.getElementById("cartOrder");
+  const addedToast = document.getElementById("addedToast");
 
-  function createArt(type, image = "") {
-    if (image) {
-      return `<img class="product-photo" src="${image}" alt="">`;
+  const favOpen = document.getElementById("favOpen");
+  const favClose = document.getElementById("favClose");
+  const favPanel = document.getElementById("favPanel");
+  const favItems = document.getElementById("favItems");
+  const favCount = document.getElementById("favCount");
+
+  let activeFilter = "all";
+  let searchQuery = "";
+  let currentProduct = null;
+  let toastTimer = null;
+
+  const products = cards.map(card => getProductFromCard(card));
+  let cart = readStorage("inputxCart", []).map(normalizeCartItem).filter(Boolean);
+  let favorites = readStorage("inputxFavorites", []).map(normalizeFavoriteItem).filter(Boolean);
+
+  function readStorage(key, fallback) {
+    try {
+      const value = JSON.parse(localStorage.getItem(key));
+      return Array.isArray(value) ? value : fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  function slugify(value) {
+    return String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9а-яё-]/gi, "");
+  }
+
+  function parsePrice(price) {
+    const number = String(price || "")
+      .replace("$", "")
+      .replace("от", "")
+      .trim();
+    return Number(number) || 0;
+  }
+
+  function getProductId(card) {
+    return card.dataset.id || slugify(card.dataset.title);
+  }
+
+  function getProductFromCard(card) {
+    const title = card.dataset.title || "";
+    const price = card.dataset.price || "";
+
+    return {
+      id: getProductId(card),
+      title,
+      price,
+      priceNumber: parsePrice(price),
+      link: card.dataset.link || "https://t.me/inputXstore",
+      image: card.dataset.image || "",
+      desc: card.dataset.desc || "",
+      specs: card.dataset.specs || "",
+      type: card.dataset.type || "accessory"
+    };
+  }
+
+  function getProductById(id) {
+    return products.find(product => product.id === id) || null;
+  }
+
+  function normalizeFavoriteItem(item) {
+    if (typeof item === "string") {
+      return getProductById(slugify(item)) || products.find(product => product.title === item) || null;
     }
 
-    if (type === "keyboard") {
+    if (!item || typeof item !== "object") return null;
+
+    const title = item.title || "";
+    const product = getProductById(item.id) || products.find(cardProduct => cardProduct.title === title);
+
+    return {
+      id: product?.id || item.id || slugify(title),
+      title: product?.title || title,
+      price: product?.price || item.price || item.priceText || "",
+      link: product?.link || item.link || "https://t.me/inputXstore",
+      image: product?.image || item.image || ""
+    };
+  }
+
+  function normalizeCartItem(item) {
+    if (!item || typeof item !== "object") return null;
+
+    const product = getProductById(item.id) || products.find(cardProduct => cardProduct.title === item.title);
+    const price = product?.price || item.price || item.priceText || "";
+
+    return {
+      id: product?.id || item.id || slugify(item.title),
+      title: product?.title || item.title || "",
+      price,
+      priceNumber: product?.priceNumber ?? item.priceNumber ?? parsePrice(price),
+      link: product?.link || item.link || "https://t.me/inputXstore",
+      image: product?.image || item.image || "",
+      qty: Math.max(1, Number(item.qty) || 1)
+    };
+  }
+
+  function saveCart() {
+    localStorage.setItem("inputxCart", JSON.stringify(cart));
+  }
+
+  function saveFavorites() {
+    localStorage.setItem("inputxFavorites", JSON.stringify(favorites));
+  }
+
+  function createArt(product) {
+    if (product.image) {
+      return `<img class="product-photo" src="${product.image}" alt="">`;
+    }
+
+    if (product.type === "keyboard") {
       return `
         <div class="keyboard">
           <div class="key"></div><div class="key"></div><div class="key glow"></div><div class="key"></div><div class="key"></div>
@@ -80,7 +151,7 @@
       `;
     }
 
-    if (type === "mouse") {
+    if (product.type === "mouse") {
       return `<div class="mouse"></div>`;
     }
 
@@ -92,39 +163,38 @@
     `;
   }
 
-  function parsePrice(priceText) {
-    const number = priceText.replace("$", "").replace("от", "").trim();
-    return Number(number) || 0;
+  function applyCatalogFilters() {
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+      const product = getProductFromCard(card);
+      const matchesCategory = activeFilter === "all" || card.dataset.category === activeFilter;
+      const matchesSearch = !searchQuery || product.title.toLowerCase().includes(searchQuery);
+      const isVisible = matchesCategory && matchesSearch;
+
+      card.classList.toggle("hide", !isVisible);
+      if (isVisible) visibleCount += 1;
+    });
+
+    if (searchEmpty) {
+      searchEmpty.classList.toggle("active", visibleCount === 0);
+    }
   }
 
   function openModal(card) {
-    const title = card.dataset.title;
-    const desc = card.dataset.desc;
-    const price = card.dataset.price;
-    const oldPrice = card.dataset.old;
-    const type = card.dataset.type;
-    const specs = card.dataset.specs.split("|");
-    const link = card.dataset.link;
-    const image = card.dataset.image || "";
+    const product = getProductFromCard(card);
+    const specs = product.specs ? product.specs.split("|") : [];
 
-    currentProduct = {
-      id: title,
-      title: title,
-      priceText: price,
-      priceNumber: parsePrice(price),
-      link: link,
-      image: image
-    };
+    currentProduct = product;
 
-    modalArt.innerHTML = createArt(type, image);
-    modalTitle.textContent = title;
-    modalDesc.textContent = desc;
-    modalPrice.textContent = price;
-    modalOldPrice.textContent = oldPrice || "";
-    modalOrder.href = link;
+    modalArt.innerHTML = createArt(product);
+    modalTitle.textContent = product.title;
+    modalDesc.textContent = product.desc;
+    modalPrice.textContent = product.price;
+    modalOldPrice.textContent = card.dataset.old || "";
+    modalOrder.href = product.link;
 
     modalSpecs.innerHTML = "";
-
     specs.forEach(spec => {
       const item = document.createElement("div");
       item.textContent = spec;
@@ -132,7 +202,6 @@
     });
 
     let addButton = document.getElementById("modalAddCart");
-
     if (!addButton) {
       addButton = document.createElement("button");
       addButton.className = "btn-second";
@@ -143,9 +212,7 @@
       actions.insertBefore(addButton, actions.children[1]);
 
       addButton.addEventListener("click", () => {
-        if (currentProduct) {
-          addToCart(currentProduct);
-        }
+        if (currentProduct) addToCart(currentProduct);
       });
     }
 
@@ -158,82 +225,6 @@
     document.body.style.overflow = "";
   }
 
-  cards.forEach(card => {
-    card.addEventListener("click", () => openModal(card));
-  });
-
-  modalClose.addEventListener("click", closeModal);
-  modalCloseSecond.addEventListener("click", closeModal);
-
-  modal.addEventListener("click", event => {
-    if (event.target === modal) {
-      closeModal();
-    }
-  });
-
-  document.addEventListener("keydown", event => {
-if (event.key === "Escape") {
-  closeModal();
-  closeCart();
-  closeFav();
-}
-  });
-
-  const cartOpen = document.getElementById("cartOpen");
-  const cartClose = document.getElementById("cartClose");
-  const cartPanel = document.getElementById("cartPanel");
-  const cartItems = document.getElementById("cartItems");
-  const cartCount = document.getElementById("cartCount");
-  const cartTotal = document.getElementById("cartTotal");
-  const cartOrder = document.getElementById("cartOrder");
-  const addedToast = document.getElementById("addedToast");
-
-  let cart = JSON.parse(localStorage.getItem("inputxCart")) || [];
-
-  function getProductFromCard(card) {
-    return {
-      id: card.dataset.title,
-      title: card.dataset.title,
-      priceText: card.dataset.price,
-      priceNumber: parsePrice(card.dataset.price),
-      link: card.dataset.link,
-      image: card.dataset.image || ""
-    };
-  }
-
-  function getProductById(id) {
-    const card = Array.from(cards).find(item => item.dataset.title === id);
-    return card ? getProductFromCard(card) : null;
-  }
-
-  let savedFavorites = JSON.parse(localStorage.getItem("inputxFavorites")) || [];
-  let favorites = Array.isArray(savedFavorites)
-    ? savedFavorites
-        .map(item => typeof item === "string" ? getProductById(item) : item)
-        .filter(Boolean)
-    : [];
- const favOpen = document.getElementById("favOpen");
-const favClose = document.getElementById("favClose");
-const favPanel = document.getElementById("favPanel");
-const favItems = document.getElementById("favItems");
-const favCount = document.getElementById("favCount");
-
-function openFav() {
-  favPanel.classList.add("active");
-  document.body.style.overflow = "hidden";
-}
-
-function closeFav() {
-  favPanel.classList.remove("active");
-  document.body.style.overflow = "";
-}
-
-favOpen.addEventListener("click", openFav);
-favClose.addEventListener("click", closeFav);
-
-favPanel.addEventListener("click", (e) => {
-  if (e.target === favPanel) closeFav();
-});
   function openCart() {
     cartPanel.classList.add("active");
     document.body.style.overflow = "hidden";
@@ -244,10 +235,23 @@ favPanel.addEventListener("click", (e) => {
     document.body.style.overflow = "";
   }
 
-  function showToast() {
-    addedToast.classList.add("active");
+  function openFav() {
+    favPanel.classList.add("active");
+    document.body.style.overflow = "hidden";
+  }
 
-    setTimeout(() => {
+  function closeFav() {
+    favPanel.classList.remove("active");
+    document.body.style.overflow = "";
+  }
+
+  function showToast() {
+    if (!addedToast) return;
+
+    addedToast.classList.add("active");
+    clearTimeout(toastTimer);
+
+    toastTimer = setTimeout(() => {
       addedToast.classList.remove("active");
     }, 1600);
   }
@@ -259,7 +263,12 @@ favPanel.addEventListener("click", (e) => {
       existing.qty += 1;
     } else {
       cart.push({
-        ...product,
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        priceNumber: product.priceNumber,
+        link: product.link,
+        image: product.image,
         qty: 1
       });
     }
@@ -275,7 +284,6 @@ favPanel.addEventListener("click", (e) => {
 
   function changeQty(id, direction) {
     const item = cart.find(product => product.id === id);
-
     if (!item) return;
 
     item.qty += direction;
@@ -287,116 +295,110 @@ favPanel.addEventListener("click", (e) => {
 
     renderCart();
   }
-  function saveFavorites() {
-  localStorage.setItem("inputxFavorites", JSON.stringify(favorites));
-}
 
-function updateFavoriteButtons() {
-  cards.forEach(card => {
-    const title = card.dataset.title;
-    const button = card.querySelector(".favorite-btn");
-
-    if (!button) return;
-
-    const exists = favorites.find(item => item.id === title);
-
-    if (exists) {
-      button.classList.add("active");
-      button.textContent = "♥";
-    } else {
-      button.classList.remove("active");
-      button.textContent = "♡";
-    }
-  });
-}
-
-function renderFavorites() {
-  favItems.innerHTML = "";
-
-  if (favorites.length === 0) {
-    favItems.innerHTML = `<div class="cart-empty">Нет избранных товаров</div>`;
-  } else {
-    favorites.forEach(item => {
-      const div = document.createElement("div");
-      div.className = "cart-item";
-
-      div.innerHTML = `
-        <div class="fav-item">
-          ${item.image ? `<img class="fav-thumb" src="${item.image}" alt="">` : ""}
-          <div class="fav-content">
-        <div class="cart-item-top">
-          <div class="cart-item-title">${item.title}</div>
-          <div class="cart-item-price">${item.priceText}</div>
-        </div>
-
-        <div class="cart-controls">
-          <button class="btn-second" type="button" data-action="fav-addcart" data-id="${item.id}">
-            В корзину
-          </button>
-
-          <a href="${item.link}" target="_blank" class="btn-second">
-            Заказать
-          </a>
-
-          <button class="remove-item" type="button" data-action="remove-fav" data-id="${item.id}">
-            Убрать
-          </button>
-        </div>
-          </div>
-        </div>
-      `;
-
-      favItems.appendChild(div);
-    });
-  }
-
-  favCount.textContent = favorites.length;
-}
-
-document.querySelectorAll(".favorite-btn").forEach(button => {
-  button.addEventListener("click", event => {
-    event.stopPropagation();
-
-    const card = button.closest(".card");
-    const product = getProductFromCard(card);
-    const exists = favorites.find(item => item.id === product.id);
+  function toggleFavorite(product) {
+    const exists = favorites.some(item => item.id === product.id);
 
     if (exists) {
       favorites = favorites.filter(item => item.id !== product.id);
     } else {
-      favorites.push(product);
+      favorites.push({
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        link: product.link,
+        image: product.image
+      });
     }
 
     saveFavorites();
     updateFavoriteButtons();
     renderFavorites();
-  });
-});
+  }
 
-favItems.addEventListener("click", event => {
-  const action = event.target.dataset.action;
-  const id = event.target.dataset.id;
+  function updateFavoriteButtons() {
+    cards.forEach(card => {
+      const product = getProductFromCard(card);
+      const button = card.querySelector(".favorite-btn");
+      if (!button) return;
 
-  if (!action || !id) return;
+      const isActive = favorites.some(item => item.id === product.id);
+      button.classList.toggle("active", isActive);
+      button.textContent = isActive ? "♥" : "♡";
+    });
 
-  if (action === "remove-fav") {
-    favorites = favorites.filter(item => item.id !== id);
-    saveFavorites();
+    favCount.textContent = favorites.length;
+  }
+
+  function renderFavorites() {
+    favItems.innerHTML = "";
+
+    if (favorites.length === 0) {
+      favItems.innerHTML = `<div class="cart-empty">Нет избранных товаров</div>`;
+      updateFavoriteButtons();
+      return;
+    }
+
+    favorites.forEach(item => {
+      const favoriteItem = document.createElement("div");
+      favoriteItem.className = "cart-item";
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "fav-item";
+
+      if (item.image) {
+        const image = document.createElement("img");
+        image.className = "fav-thumb";
+        image.src = item.image;
+        image.alt = item.title;
+        wrapper.appendChild(image);
+      }
+
+      const content = document.createElement("div");
+      content.className = "fav-content";
+
+      const top = document.createElement("div");
+      top.className = "cart-item-top";
+
+      const title = document.createElement("div");
+      title.className = "cart-item-title";
+      title.textContent = item.title;
+
+      const price = document.createElement("div");
+      price.className = "cart-item-price";
+      price.textContent = item.price;
+
+      top.append(title, price);
+
+      const controls = document.createElement("div");
+      controls.className = "cart-controls";
+
+      const order = document.createElement("a");
+      order.className = "btn-second";
+      order.href = item.link;
+      order.target = "_blank";
+      order.rel = "noopener";
+      order.textContent = "Заказать";
+
+      const remove = document.createElement("button");
+      remove.className = "remove-item";
+      remove.type = "button";
+      remove.dataset.action = "remove-fav";
+      remove.dataset.id = item.id;
+      remove.textContent = "Удалить";
+
+      controls.append(order, remove);
+      content.append(top, controls);
+      wrapper.appendChild(content);
+      favoriteItem.appendChild(wrapper);
+      favItems.appendChild(favoriteItem);
+    });
+
     updateFavoriteButtons();
-    renderFavorites();
   }
 
-  if (action === "fav-addcart") {
-    const product = getProductById(id);
-    if (product) addToCart(product);
-  }
-});
-
-saveFavorites();
-updateFavoriteButtons();
-renderFavorites();
   function renderCart() {
-    localStorage.setItem("inputxCart", JSON.stringify(cart));
+    saveCart();
     cartItems.innerHTML = "";
 
     if (cart.length === 0) {
@@ -409,12 +411,12 @@ renderFavorites();
         cartItem.innerHTML = `
           <div class="cart-item-top">
             <div class="cart-item-title">${item.title}</div>
-            <div class="cart-item-price">${item.priceText}</div>
+            <div class="cart-item-price">${item.price}</div>
           </div>
 
           <div class="cart-controls">
             <div class="qty">
-              <button type="button" data-action="minus" data-id="${item.id}">−</button>
+              <button type="button" data-action="minus" data-id="${item.id}">-</button>
               <span>${item.qty}</span>
               <button type="button" data-action="plus" data-id="${item.id}">+</button>
             </div>
@@ -434,7 +436,6 @@ renderFavorites();
 
     cartCount.textContent = totalItems;
     cartTotal.textContent = `$${totalPrice}`;
-
     updateTelegramLink();
   }
 
@@ -444,12 +445,8 @@ renderFavorites();
       return;
     }
 
-    const lines = cart.map(item => {
-      return `— ${item.title}: ${item.qty} шт. (${item.priceText})`;
-    });
-
+    const lines = cart.map(item => `${item.title}: ${item.qty} шт. (${item.price})`);
     const totalPrice = cart.reduce((sum, item) => sum + item.priceNumber * item.qty, 0);
-
     const message =
       `Привет! Хочу оформить заказ в InputX:\n\n` +
       lines.join("\n") +
@@ -459,35 +456,80 @@ renderFavorites();
     cartOrder.href = `https://t.me/inputXstore?text=${encodeURIComponent(message)}`;
   }
 
+  filterButtons.forEach(button => {
+    button.addEventListener("click", () => {
+      activeFilter = button.dataset.filter || "all";
+      filterButtons.forEach(filterButton => filterButton.classList.remove("active"));
+      button.classList.add("active");
+      applyCatalogFilters();
+    });
+  });
+
+  if (catalogSearch) {
+    catalogSearch.addEventListener("input", event => {
+      searchQuery = event.target.value.trim().toLowerCase();
+      applyCatalogFilters();
+    });
+  }
+
+  cards.forEach(card => {
+    const favoriteButton = card.querySelector(".favorite-btn");
+
+    if (favoriteButton) {
+      favoriteButton.addEventListener("click", event => {
+        event.stopPropagation();
+        toggleFavorite(getProductFromCard(card));
+      });
+    }
+
+    card.addEventListener("click", () => openModal(card));
+  });
+
+  modalClose.addEventListener("click", closeModal);
+  modalCloseSecond.addEventListener("click", closeModal);
+  modal.addEventListener("click", event => {
+    if (event.target === modal) closeModal();
+  });
+
   cartOpen.addEventListener("click", openCart);
   cartClose.addEventListener("click", closeCart);
-
   cartPanel.addEventListener("click", event => {
-    if (event.target === cartPanel) {
-      closeCart();
-    }
+    if (event.target === cartPanel) closeCart();
+  });
+
+  favOpen.addEventListener("click", openFav);
+  favClose.addEventListener("click", closeFav);
+  favPanel.addEventListener("click", event => {
+    if (event.target === favPanel) closeFav();
   });
 
   cartItems.addEventListener("click", event => {
-    const action = event.target.dataset.action;
-    const id = event.target.dataset.id;
-
+    const { action, id } = event.target.dataset;
     if (!action || !id) return;
 
-    if (action === "plus") {
-      changeQty(id, 1);
-    }
-
-    if (action === "minus") {
-      changeQty(id, -1);
-    }
-
-    if (action === "remove") {
-      removeFromCart(id);
-    }
+    if (action === "plus") changeQty(id, 1);
+    if (action === "minus") changeQty(id, -1);
+    if (action === "remove") removeFromCart(id);
   });
 
-  renderCart(); 
+  favItems.addEventListener("click", event => {
+    const { action, id } = event.target.dataset;
+    if (action !== "remove-fav" || !id) return;
+
+    favorites = favorites.filter(item => item.id !== id);
+    saveFavorites();
+    renderFavorites();
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key !== "Escape") return;
+    closeModal();
+    closeCart();
+    closeFav();
+  });
+
+  saveFavorites();
+  renderCart();
   renderFavorites();
-
-
+  applyCatalogFilters();
+});
